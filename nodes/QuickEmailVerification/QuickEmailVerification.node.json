@@ -1,0 +1,18 @@
+{
+	"node": "quickEmailVerification",
+	"nodeVersion": "1.0",
+	"codexVersion": "1.0",
+	"categories": ["Utility", "Marketing"],
+	"resources": {
+		"credentialDocumentation": [
+			{
+				"url": "https://docs.quickemailverification.com/"
+			}
+		],
+		"primaryDocumentation": [
+			{
+				"url": "https://github.com/quickemailverification/n8n-nodes-quickemailverification#readme"
+			}
+		]
+	}
+}

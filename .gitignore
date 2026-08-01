@@ -1,0 +1,35 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+node_modules/
+pnpm-lock.yaml
+
+# build output
+/dist
+*.tsbuildinfo
+
+# commit message files
+commit_msg*.txt
+*_commit_msg.txt
+pr_msg*.txt
+*_pr_msg.txt
+
+# local env files and secrets
+.env
+.env.local
+.env.*.local
+credentials.json
+*.pem
+
+# editors
+.vscode/
+.idea/
+.cursorrules
+.cursorignore
+*.swp
+*.swo
+
+# misc
+.DS_Store
+Thumbs.db
+*.log
