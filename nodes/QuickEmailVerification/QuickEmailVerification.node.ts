@@ -2,6 +2,7 @@ import type {
 	IBinaryData,
 	IExecuteFunctions,
 	INodeExecutionData,
+	INodePropertyOptions,
 	INodeType,
 	INodeTypeDescription,
 	IDataObject,
@@ -29,6 +30,49 @@ import {
 	itemInputProperties,
 } from './itemInput';
 
+/** The operations the node offers, and the single source of their display names. */
+const OPERATION_OPTIONS: INodePropertyOptions[] = [
+	{
+		name: 'Verify an Email Address',
+		value: 'verifyEmail',
+		description: 'Verify a single email address (real-time)',
+		action: 'Verify an email address',
+	},
+	{
+		name: 'List Verification Send File',
+		value: 'bulkSendFile',
+		description: 'Upload a file to QuickEmailVerification for bulk email verification',
+		action: 'List verification send file',
+	},
+	{
+		name: 'List Verification File Status',
+		value: 'bulkFileStatus',
+		description: 'Retrieve the verification status of a previously submitted file',
+		action: 'List verification file status',
+	},
+	{
+		name: 'List Verification Get File',
+		value: 'bulkGetFile',
+		description: 'Download the verification results for a previously submitted file',
+		action: 'List verification get file',
+	},
+	{
+		name: 'List Verification Delete File',
+		value: 'bulkDeleteFile',
+		description: 'Delete a previously submitted verification file and its associated results',
+		action: 'List verification delete file',
+	},
+];
+
+/**
+ * Canvas subtitle: the display name of the selected operation. `$parameter`
+ * holds the stored value (e.g. `bulkSendFile`), so the labels are looked up
+ * from the options above rather than repeated here.
+ */
+const OPERATION_SUBTITLE = `={{ (${JSON.stringify(
+	Object.fromEntries(OPERATION_OPTIONS.map((option) => [option.value, option.name])),
+)})[$parameter["operation"]] || ${JSON.stringify(OPERATION_OPTIONS[0].name)} }}`;
+
 export class QuickEmailVerification implements INodeType {
 	description: INodeTypeDescription = {
 		displayName: 'QuickEmailVerification',
@@ -37,11 +81,7 @@ export class QuickEmailVerification implements INodeType {
 		group: ['transform'],
 		version: 1,
 		usableAsTool: true,
-		subtitle:
-			'={{$parameter["operation"] === "bulkSendFile" ? "List Verification Send File" : ' +
-			'$parameter["operation"] === "bulkFileStatus" ? "List Verification File Status" : ' +
-			'$parameter["operation"] === "bulkGetFile" ? "List Verification Get File" : ' +
-			'$parameter["operation"] === "bulkDeleteFile" ? "List Verification Delete File" : "Verify an Email Address"}}',
+		subtitle: OPERATION_SUBTITLE,
 		description: 'Verify a single email address or an email list with QuickEmailVerification',
 		defaults: { name: 'QuickEmailVerification' },
 		inputs: ['main'],
@@ -53,39 +93,7 @@ export class QuickEmailVerification implements INodeType {
 				name: 'operation',
 				type: 'options',
 				noDataExpression: true,
-				options: [
-					{
-						name: 'Verify an Email Address',
-						value: 'verifyEmail',
-						description: 'Verify a single email address (real-time)',
-						action: 'Verify an email address',
-					},
-					{
-						name: 'List Verification Send File',
-						value: 'bulkSendFile',
-						description: 'Upload a file to QuickEmailVerification for bulk email verification',
-						action: 'List verification send file',
-					},
-					{
-						name: 'List Verification File Status',
-						value: 'bulkFileStatus',
-						description: 'Retrieve the verification status of a previously submitted file',
-						action: 'List verification file status',
-					},
-					{
-						name: 'List Verification Get File',
-						value: 'bulkGetFile',
-						description: 'Download the verification results for a previously submitted file',
-						action: 'List verification get file',
-					},
-					{
-						name: 'List Verification Delete File',
-						value: 'bulkDeleteFile',
-						description:
-							'Delete a previously submitted verification file and its associated results',
-						action: 'List verification delete file',
-					},
-				],
+				options: OPERATION_OPTIONS,
 				default: 'verifyEmail',
 			},
 

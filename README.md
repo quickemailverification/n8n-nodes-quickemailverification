@@ -1,16 +1,18 @@
-# QuickEmailVerification for n8n
+<p align="center">
+  <img src="https://quickemailverification.com/images/logo_print.png" alt="Quick Email Verification">
+  <br>
+</p>
+
+# n8n-nodes-quickemailverification
 
 Verify email addresses inside your [n8n](https://n8n.io/) workflows — one address at a time, or a whole list at once.
 This is the official community node for the [QuickEmailVerification](https://quickemailverification.com) API.
-
-[![Buy Me A Coffee](https://img.shields.io/badge/Buy%20Me%20A%20Coffee-Support-yellow.svg)](https://buymeacoffee.com/quickemailverification)
 
 ![QuickEmailVerification Node Overview](https://raw.githubusercontent.com/quickemailverification/n8n-nodes-quickemailverification/main/overview.gif)
 
 **Contents:** [Install](#install) · [API key](#api-key) · [Quick start](#quick-start) ·
 [Operations](#operations) · [Building a list from workflow items](#building-a-list-from-workflow-items) ·
-[Waiting for a list to finish](#waiting-for-a-list-to-finish) · [Testing for free](#testing-for-free) ·
-[Errors](#errors) · [Reference](#reference)
+[Waiting for a list to finish](#waiting-for-a-list-to-finish) · [Errors](#errors) · [Reference](#reference)
 
 ## Install
 
@@ -24,8 +26,11 @@ See the n8n [community node installation guide](https://docs.n8n.io/integrations
 self-host and prefer installing from npm. To build from a clone of this repository:
 
 ```bash
-# --ignore-scripts skips a native dependency that this node does not need and
-# that fails to compile on Node 20
+# The n8n-workflow devDependency pulls in isolated-vm (via @n8n/expression-runtime),
+# a native module that ships prebuilds only for Node 22 and 24. On Node 20 its install
+# script falls back to compiling from source, which fails. Nothing in this node's build
+# loads it — n8n provides its own at runtime — so skipping install scripts is safe.
+# On Node 22+ a plain `npm install` works too.
 npm install --ignore-scripts
 npm run build
 ```
@@ -272,22 +277,6 @@ a stuck execution.
 `Complete` moves on to Get File, `Processing` and `Queued` go back around, `Failed` exits with `error_reason` to look
 at. Simpler to reason about, and it needs no publicly reachable n8n.
 
-## Testing for free
-
-Point the Email field at a [sandbox](https://docs.quickemailverification.com/email-verification-api/sandbox-mode)
-address while you build. The prefix picks the response, and nothing is charged:
-
-| Address            | You get                      |
-| :----------------- | :--------------------------- |
-| `valid@…`          | `valid`                      |
-| `safe-to-send@…`   | `valid`, `safe_to_send` set  |
-| `rejected-email@…` | `invalid`                    |
-| `disposable@…`     | `valid`, `disposable` set    |
-| `role@…`           | `valid`, `role` set          |
-| `accept-all@…`     | `valid`, `accept_all` set    |
-| `timeout@…`        | `unknown`                    |
-| `low-credit@…`     | An insufficient-credit error |
-
 ## Errors
 
 Failures arrive as readable n8n errors rather than raw HTTP: invalid API key (401), out of credits (402), a file or
@@ -309,7 +298,6 @@ The list operations all revolve around one identifier: the `id` returned by Veri
 as `file_id`.
 
 - [API documentation](https://docs.quickemailverification.com/)
-- [Sandbox mode](https://docs.quickemailverification.com/email-verification-api/sandbox-mode)
 - [n8n community nodes](https://docs.n8n.io/integrations/#community-nodes)
 
 ## Compatibility

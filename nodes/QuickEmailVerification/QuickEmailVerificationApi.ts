@@ -1,5 +1,6 @@
 import type { IExecuteFunctions, IDataObject } from 'n8n-workflow';
 import { randomBytes } from 'node:crypto';
+import { version as packageVersion } from '../../package.json';
 
 /** Version of the QuickEmailVerification REST API this node targets. */
 export const API_VERSION = 'v1';
@@ -8,10 +9,9 @@ const API_BASE = `https://api.quickemailverification.com/${API_VERSION}`;
 
 /**
  * Sent on every request so QuickEmailVerification can attribute traffic to this
- * node. Keep the version in step with `version` in package.json.
+ * node. The version is read from package.json so a release bump updates it.
  */
-export const USER_AGENT =
-	'quickemailverification-n8n/v1.0.0 (https://github.com/quickemailverification/n8n-nodes-quickemailverification)';
+export const USER_AGENT = `quickemailverification-n8n/v${packageVersion} (https://github.com/quickemailverification/n8n-nodes-quickemailverification)`;
 
 /** Headers every request carries, merged with any request-specific ones. */
 function baseHeaders(extra: IDataObject = {}): IDataObject {
@@ -103,16 +103,8 @@ export interface IBulkUploadOptions {
 	notificationEmail?: string;
 }
 
-/** Minimal contract required to read a job status (kept structural for testing). */
-export interface IStatusPoller {
-	getStatus(jobId: string): Promise<IBulkStatus>;
-}
-
-/**
- * Translate a failed n8n HTTP request into a readable, user-facing error.
- * Exported so it can be unit-tested independently of the network layer.
- */
-export function mapHttpError(error: unknown): Error {
+/** Translate a failed n8n HTTP request into a readable, user-facing error. */
+function mapHttpError(error: unknown): Error {
 	const err = (error ?? {}) as {
 		statusCode?: number;
 		httpCode?: number | string;
@@ -152,7 +144,7 @@ export function mapHttpError(error: unknown): Error {
  * Covers single verification and the email list lifecycle
  * (verify list -> job status -> download report -> delete job).
  */
-export class QuickEmailVerificationClient implements IStatusPoller {
+export class QuickEmailVerificationClient {
 	constructor(private readonly ctx: IExecuteFunctions) {}
 
 	/** Verify a single email address. */
