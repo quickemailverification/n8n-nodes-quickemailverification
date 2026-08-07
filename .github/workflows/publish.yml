@@ -1,0 +1,56 @@
+name: Publish
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      # Required for npm provenance: lets the job mint the OIDC token
+      # that npm exchanges for a signed provenance attestation.
+      id-token: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: https://registry.npmjs.org
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Build
+        run: npm run build
+
+      - name: Release
+        # Publishes to npm with a provenance attestation (requires id-token: write above).
+        # Lint and build already ran as separate steps above.
+        #
+        # Works with either npm auth method (see PUBLISHING.md):
+        #   Option A — OIDC Trusted Publishing: leave NPM_TOKEN unset, and the
+        #     npm config set line below is skipped so npm uses the OIDC exchange.
+        #   Option B — Automation token: set the NPM_TOKEN repo secret.
+        # Provenance itself is signed via GitHub's OIDC either way, which is why
+        # the id-token: write permission above is required in both cases.
+        run: |
+          if [ -n "$NPM_TOKEN" ]; then
+            npm config set //registry.npmjs.org/:_authToken "$NPM_TOKEN"
+          fi
+          npm publish --provenance --access public
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}

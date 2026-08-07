@@ -5,6 +5,18 @@ All notable changes to `@quickemailverification/n8n-nodes-quickemailverification
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.1] - 2026-08-06
+
+Maintenance release. No functional changes — the same operations, parameters and
+API behaviour as 1.0.0.
+
+### Changed
+
+- Published from GitHub Actions with an [npm provenance](https://docs.npmjs.com/generating-provenance-statements)
+  attestation, so the package can be cryptographically verified as having been built
+  from this repository at this commit. This is required for submission to the n8n
+  Creator Portal; 1.0.0 was published manually and carries no attestation.
+
 ## [1.0.0] - 2026-07-29
 
 Initial release.
