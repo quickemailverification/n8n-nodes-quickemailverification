@@ -1,5 +1,4 @@
 import type { IExecuteFunctions, IDataObject } from 'n8n-workflow';
-import { randomBytes } from 'node:crypto';
 import { version as packageVersion } from '../../package.json';
 
 /** Version of the QuickEmailVerification REST API this node targets. */
@@ -329,6 +328,22 @@ function coerceJson(raw: unknown): unknown {
 }
 
 /**
+ * Build a multipart boundary that is guaranteed absent from the payload.
+ * n8n Cloud forbids `node:crypto`, so instead of relying on cryptographic
+ * randomness to avoid a collision, the candidate is checked against the file and
+ * a counter is appended until it is genuinely unique.
+ */
+function makeBoundary(file: Buffer): string {
+	const haystack = file.toString('latin1');
+	const seed = Math.random().toString(36).slice(2) + Date.now().toString(36);
+	let boundary = `----QEVBoundary${seed}`;
+	for (let suffix = 0; haystack.includes(boundary); suffix++) {
+		boundary = `----QEVBoundary${seed}${suffix}`;
+	}
+	return boundary;
+}
+
+/**
  * Assemble a multipart/form-data body without any external form library.
  * The boundary is randomised so it can never collide with the file contents.
  */
@@ -337,7 +352,7 @@ function buildMultipart(
 	options: IBulkUploadOptions,
 ): { body: Buffer; boundary: string } {
 	const filename = (options.filename ?? 'list.csv').replace(/"/g, '');
-	const boundary = `----QEVBoundary${randomBytes(16).toString('hex')}`;
+	const boundary = makeBoundary(file);
 	const chunks: Buffer[] = [];
 
 	// Notification email is not a documented API field; sent best-effort so it is

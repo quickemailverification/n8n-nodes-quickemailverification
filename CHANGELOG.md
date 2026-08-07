@@ -5,6 +5,45 @@ All notable changes to `@quickemailverification/n8n-nodes-quickemailverification
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.2] - 2026-08-07
+
+Compliance release for the n8n Creator Portal. The submission of 1.0.1 was
+rejected by `@n8n/scan-community-package`, whose ruleset is stricter than the
+`eslint-plugin-n8n-nodes-base` config used locally.
+
+### Removed
+
+- **Breaking:** the **File Path** upload method for **List Verification Send File**,
+  along with the **Upload Method** parameter that selected it. Reading a file from
+  the n8n host requires `node:fs`, which n8n Cloud forbids in community nodes. Use
+  the **Input Binary Field** instead, feeding the node a binary property from a
+  preceding Read/Write Files or HTTP Request node. Workflows that used File Path
+  must add such a node ahead of this one.
+
+### Changed
+
+- `inputs`/`outputs` now use `NodeConnectionTypes.Main` instead of the `'main'`
+  string literal.
+- Errors escaping the execute loop are wrapped in `NodeApiError` rather than
+  re-thrown raw, so they reach the UI with node context. Existing `NodeApiError`s
+  pass through unchanged and `NodeOperationError` messages are preserved.
+- The multipart boundary is derived without `node:crypto`, and is now checked
+  against the payload so uniqueness is guaranteed rather than probabilistic.
+- Report options are listed alphabetically; option defaults are literals.
+
+### Added
+
+- `peerDependencies` with `"n8n-workflow": "*"`, as the portal requires.
+- Light and dark icon variants for both the node and the credential.
+
+### Maintenance
+
+- The minimum Node.js version is now 22.22, matching n8n's own `engines`
+  requirement. The previous floor of 18.10 advertised support for releases that
+  are end-of-life and that no current n8n host can run.
+- The publish workflow builds on Node 24 (Active LTS) instead of 22, and
+  `@types/node` tracks the same major.
+
 ## [1.0.1] - 2026-08-06
 
 Maintenance release. No functional changes — the same operations, parameters and

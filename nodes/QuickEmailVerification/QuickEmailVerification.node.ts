@@ -8,9 +8,7 @@ import type {
 	IDataObject,
 	JsonObject,
 } from 'n8n-workflow';
-import { NodeApiError, NodeOperationError } from 'n8n-workflow';
-import { readFile, stat } from 'node:fs/promises';
-import { basename } from 'node:path';
+import { NodeApiError, NodeConnectionTypes, NodeOperationError } from 'n8n-workflow';
 
 import { QuickEmailVerificationClient } from './QuickEmailVerificationApi';
 import type { IBulkStatus, IBulkUploadOptions } from './QuickEmailVerificationApi';
@@ -77,15 +75,18 @@ export class QuickEmailVerification implements INodeType {
 	description: INodeTypeDescription = {
 		displayName: 'QuickEmailVerification',
 		name: 'quickEmailVerification',
-		icon: 'file:quickemailverification.svg',
+		icon: {
+			light: 'file:quickemailverification.svg',
+			dark: 'file:quickemailverification.dark.svg',
+		},
 		group: ['transform'],
 		version: 1,
 		usableAsTool: true,
 		subtitle: OPERATION_SUBTITLE,
 		description: 'Verify a single email address or an email list with QuickEmailVerification',
 		defaults: { name: 'QuickEmailVerification' },
-		inputs: ['main'],
-		outputs: ['main'],
+		inputs: [NodeConnectionTypes.Main],
+		outputs: [NodeConnectionTypes.Main],
 		credentials: [{ name: 'quickEmailVerificationApi', required: true }],
 		properties: [
 			{
@@ -110,7 +111,6 @@ export class QuickEmailVerification implements INodeType {
 			},
 
 			// --- List Verification Send File ---
-			// eslint-disable-next-line n8n-nodes-base/node-param-default-missing -- default is a const, not a literal
 			{
 				displayName: 'Input Type',
 				name: 'inputType',
@@ -128,31 +128,10 @@ export class QuickEmailVerification implements INodeType {
 						description: 'A new file built from input items',
 					},
 				],
-				default: InputType.FILE,
+				default: 'file',
 				displayOptions: { show: { operation: ['bulkSendFile'] } },
 				description:
 					'Type of input for the file to send. An existing file, or input fields to create a new file.',
-			},
-			{
-				displayName: 'Upload Method',
-				name: 'uploadMethod',
-				type: 'options',
-				noDataExpression: true,
-				options: [
-					{
-						name: 'Binary File',
-						value: 'binary',
-						description: 'Use a CSV/TXT file received as binary data from a previous node',
-					},
-					{
-						name: 'File Path',
-						value: 'path',
-						description: 'Read a CSV/TXT file from an absolute path on the n8n machine',
-					},
-				],
-				default: 'binary',
-				displayOptions: { show: { operation: ['bulkSendFile'], inputType: [InputType.FILE] } },
-				description: 'How the email list file is provided',
 			},
 			{
 				displayName: 'Input Binary Field',
@@ -160,32 +139,16 @@ export class QuickEmailVerification implements INodeType {
 				type: 'string',
 				default: 'data',
 				required: true,
-				hint: 'Name of the binary property holding the CSV/TXT list',
+				placeholder: 'data',
+				hint: 'Name of the binary property holding the CSV/TXT list, not the list itself',
 				displayOptions: {
 					show: {
 						operation: ['bulkSendFile'],
 						inputType: [InputType.FILE],
-						uploadMethod: ['binary'],
-					},
-				},
-				description: 'The binary property that contains the file to upload',
-			},
-			{
-				displayName: 'File Path',
-				name: 'filePath',
-				type: 'string',
-				default: '',
-				required: true,
-				placeholder: '/data/emails.csv',
-				displayOptions: {
-					show: {
-						operation: ['bulkSendFile'],
-						inputType: [InputType.FILE],
-						uploadMethod: ['path'],
 					},
 				},
 				description:
-					'Absolute path to a local CSV/TXT file to upload. The file is read from the n8n host, so only use paths you trust.',
+					'Name of the binary property that contains the file to upload, e.g. "data" from a Read/Write Files node. To verify addresses held as text or fields instead of a file, set Input Type to Items.',
 			},
 			...itemInputProperties,
 			{
@@ -240,10 +203,10 @@ export class QuickEmailVerification implements INodeType {
 				type: 'options',
 				options: [
 					{ name: 'Full Report (All Emails)', value: 'fullreport' },
-					{ name: 'Safe to Send', value: 'safetosend' },
-					{ name: 'Valid', value: 'valid' },
 					{ name: 'Invalid', value: 'invalid' },
+					{ name: 'Safe to Send', value: 'safetosend' },
 					{ name: 'Unknown', value: 'unknown' },
+					{ name: 'Valid', value: 'valid' },
 				],
 				default: 'fullreport',
 				displayOptions: { show: { operation: ['bulkGetFile'] } },
@@ -359,7 +322,11 @@ export class QuickEmailVerification implements INodeType {
 					});
 					continue;
 				}
-				throw error;
+				// Every error is wrapped rather than re-thrown, so it reaches the UI with
+				// node context attached. An existing NodeApiError is returned unchanged;
+				// a NodeOperationError is converted but keeps its message and description,
+				// so the text raised above is what the user still sees.
+				throw new NodeApiError(this.getNode(), error as JsonObject, { itemIndex: i });
 			}
 		}
 
@@ -407,35 +374,10 @@ async function sendFile(
 			generatedFile = await ctx.helpers.prepareBinaryData(file, filename, 'text/csv');
 		}
 	} else {
-		const uploadMethod = ctx.getNodeParameter('uploadMethod', itemIndex, 'binary') as string;
-		if (uploadMethod === 'binary') {
-			const binaryProperty = ctx.getNodeParameter('binaryProperty', itemIndex, 'data') as string;
-			const binary = ctx.helpers.assertBinaryData(itemIndex, binaryProperty);
-			file = await ctx.helpers.getBinaryDataBuffer(itemIndex, binaryProperty);
-			if (!filename) filename = binary.fileName || 'list.csv';
-		} else {
-			const filePath = (ctx.getNodeParameter('filePath', itemIndex, '') as string).trim();
-			if (!filePath) {
-				throw new NodeOperationError(
-					ctx.getNode(),
-					'File Path is required for the "File Path" upload method',
-					{ itemIndex },
-				);
-			}
-			let isFile = false;
-			try {
-				isFile = (await stat(filePath)).isFile();
-			} catch {
-				isFile = false;
-			}
-			if (!isFile) {
-				throw new NodeOperationError(ctx.getNode(), `No readable file found at: ${filePath}`, {
-					itemIndex,
-				});
-			}
-			file = await readFile(filePath);
-			if (!filename) filename = basename(filePath);
-		}
+		const binaryProperty = ctx.getNodeParameter('binaryProperty', itemIndex, 'data') as string;
+		const binary = ctx.helpers.assertBinaryData(itemIndex, binaryProperty);
+		file = await ctx.helpers.getBinaryDataBuffer(itemIndex, binaryProperty);
+		if (!filename) filename = binary.fileName || 'list.csv';
 	}
 
 	if (!file || file.length === 0) {

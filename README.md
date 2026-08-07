@@ -136,7 +136,7 @@ Uploads the list and returns immediately with the ID it was accepted under.
 | Parameter              | Required       | Notes                                                                                      |
 | :--------------------- | :------------- | :----------------------------------------------------------------------------------------- |
 | **Input Type**         | yes            | `File` to upload something you already have, `Items` to build the CSV from input items     |
-| **Upload Method**      | `File` input   | Read from a binary property of a previous node, or an absolute path on the n8n host        |
+| **Input Binary Field** | `File` input   | Binary property holding the CSV/TXT list, e.g. from a Read/Write Files or HTTP Request node |
 | **Item Input Type**    | `Items` input  | Field Assignment, JSON Input or Mapped — see [below](#building-a-list-from-workflow-items) |
 | **Combine Items**      | no, default on | Merge every input item into one upload. Off means one upload per item.                     |
 | **Include File**       | no             | Return the generated CSV as binary data as well                                            |
@@ -302,7 +302,7 @@ as `file_id`.
 
 ## Compatibility
 
-Requires Node.js 18.10 or later. Built and tested against n8n 2.8.
+Requires Node.js 22.22 or later, matching n8n's own requirement. Built and tested against n8n 2.8.
 
 ## Support
 

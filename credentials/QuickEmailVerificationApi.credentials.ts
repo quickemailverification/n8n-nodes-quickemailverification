@@ -2,6 +2,7 @@ import type {
 	IAuthenticateGeneric,
 	ICredentialTestRequest,
 	ICredentialType,
+	Icon,
 	INodeProperties,
 } from 'n8n-workflow';
 
@@ -18,6 +19,11 @@ export class QuickEmailVerificationApi implements ICredentialType {
 	name = 'quickEmailVerificationApi';
 
 	displayName = 'QuickEmailVerification API';
+
+	icon: Icon = {
+		light: 'file:quickemailverification.svg',
+		dark: 'file:quickemailverification.dark.svg',
+	};
 
 	documentationUrl = 'https://docs.quickemailverification.com/';
 

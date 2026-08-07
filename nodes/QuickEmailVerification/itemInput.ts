@@ -33,7 +33,6 @@ const EMAIL_VALUE = /^[^\s@,;]+@[^\s@,;]+$/;
  * Kept here so the node description stays readable.
  */
 export const itemInputProperties: INodeProperties[] = [
-	// eslint-disable-next-line n8n-nodes-base/node-param-default-missing -- default is a const, not a literal
 	{
 		displayName: 'Item Input Type',
 		name: 'itemInputType',
@@ -56,7 +55,7 @@ export const itemInputProperties: INodeProperties[] = [
 				description: "Map fields from input items. Useful when 'Combine Items' is enabled.",
 			},
 		],
-		default: ItemInputType.ASSIGNMENT,
+		default: 'assignment',
 		displayOptions: { show: { operation: ['bulkSendFile'], inputType: [InputType.ITEMS] } },
 		description: 'Type of input used to populate the email list',
 	},
