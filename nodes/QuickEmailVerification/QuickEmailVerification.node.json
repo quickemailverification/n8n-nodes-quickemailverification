@@ -1,8 +1,8 @@
 {
-	"node": "quickEmailVerification",
+	"node": "@quickemailverification/n8n-nodes-quickemailverification.quickEmailVerification",
 	"nodeVersion": "1.0",
 	"codexVersion": "1.0",
-	"categories": ["Utility", "Marketing"],
+	"categories": ["Utility", "Communication"],
 	"resources": {
 		"credentialDocumentation": [
 			{

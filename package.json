@@ -1,6 +1,6 @@
 {
 	"name": "@quickemailverification/n8n-nodes-quickemailverification",
-	"version": "1.0.2",
+	"version": "1.0.3",
 	"description": "n8n node for QuickEmailVerification API",
 	"keywords": [
 		"n8n",
