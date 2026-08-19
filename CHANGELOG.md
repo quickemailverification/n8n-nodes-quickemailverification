@@ -5,6 +5,18 @@ All notable changes to `@quickemailverification/n8n-nodes-quickemailverification
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.4] - 2026-08-19
+
+Grouping change requested during the n8n Creator Portal review of 1.0.3. No
+functional changes — the same operations, parameters and API behaviour.
+
+### Added
+
+- A **Resource** parameter with the single value **Email Verification**, so the
+  node follows n8n's recommended resource/operation grouping. It is preselected
+  and every operation is grouped under it; the **Operation** list and all of its
+  parameters are unchanged.
+
 ## [1.0.3] - 2026-08-14
 
 Codex metadata fixes requested during the n8n Creator Portal review of 1.0.2.

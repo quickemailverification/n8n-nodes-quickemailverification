@@ -69,6 +69,9 @@ Send File returns as soon as QuickEmailVerification accepts the upload; it does 
 
 ## Operations
 
+All operations sit under a single **Resource**, **Email Verification**, which is preselected —
+choose the **Operation** below it.
+
 | Operation                     | What it does                                                                |
 | :---------------------------- | :-------------------------------------------------------------------------- |
 | Verify an Email Address       | Verify a single email address (real-time).                                  |

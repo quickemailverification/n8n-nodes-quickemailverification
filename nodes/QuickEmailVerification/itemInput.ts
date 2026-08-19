@@ -6,6 +6,12 @@ import type {
 } from 'n8n-workflow';
 import { NodeOperationError } from 'n8n-workflow';
 
+/**
+ * The node's single resource. Every operation acts on the same thing — an email
+ * address, or a list of them — so they are all grouped under it.
+ */
+export const RESOURCE = 'emailVerification';
+
 /** Where the list to upload comes from. */
 export const InputType = {
 	FILE: 'file',
@@ -56,7 +62,9 @@ export const itemInputProperties: INodeProperties[] = [
 			},
 		],
 		default: 'assignment',
-		displayOptions: { show: { operation: ['bulkSendFile'], inputType: [InputType.ITEMS] } },
+		displayOptions: {
+			show: { resource: [RESOURCE], operation: ['bulkSendFile'], inputType: [InputType.ITEMS] },
+		},
 		description: 'Type of input used to populate the email list',
 	},
 	{
@@ -66,6 +74,7 @@ export const itemInputProperties: INodeProperties[] = [
 		default: {},
 		displayOptions: {
 			show: {
+				resource: [RESOURCE],
 				operation: ['bulkSendFile'],
 				inputType: [InputType.ITEMS],
 				itemInputType: [ItemInputType.ASSIGNMENT],
@@ -80,6 +89,7 @@ export const itemInputProperties: INodeProperties[] = [
 		placeholder: '{ "emails": ["john@example.com", "jane@example.com"] }',
 		displayOptions: {
 			show: {
+				resource: [RESOURCE],
 				operation: ['bulkSendFile'],
 				inputType: [InputType.ITEMS],
 				itemInputType: [ItemInputType.JSON],
@@ -95,6 +105,7 @@ export const itemInputProperties: INodeProperties[] = [
 		typeOptions: { multipleValues: true },
 		displayOptions: {
 			show: {
+				resource: [RESOURCE],
 				operation: ['bulkSendFile'],
 				inputType: [InputType.ITEMS],
 				itemInputType: [ItemInputType.MAPPED],
@@ -122,7 +133,9 @@ export const itemInputProperties: INodeProperties[] = [
 		name: 'combineItems',
 		type: 'boolean',
 		default: true,
-		displayOptions: { show: { operation: ['bulkSendFile'], inputType: [InputType.ITEMS] } },
+		displayOptions: {
+			show: { resource: [RESOURCE], operation: ['bulkSendFile'], inputType: [InputType.ITEMS] },
+		},
 		description:
 			'Whether to combine every input item into one uploaded list. Turn this off to upload one list per input item.',
 	},
@@ -131,7 +144,9 @@ export const itemInputProperties: INodeProperties[] = [
 		name: 'includeFile',
 		type: 'boolean',
 		default: false,
-		displayOptions: { show: { operation: ['bulkSendFile'], inputType: [InputType.ITEMS] } },
+		displayOptions: {
+			show: { resource: [RESOURCE], operation: ['bulkSendFile'], inputType: [InputType.ITEMS] },
+		},
 		description: 'Whether to also return the generated CSV as binary data',
 	},
 ];

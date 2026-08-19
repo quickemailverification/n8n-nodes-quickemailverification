@@ -26,6 +26,7 @@ import {
 	GENERATED_FILENAME,
 	InputType,
 	itemInputProperties,
+	RESOURCE,
 } from './itemInput';
 
 /** The operations the node offers, and the single source of their display names. */
@@ -90,10 +91,24 @@ export class QuickEmailVerification implements INodeType {
 		credentials: [{ name: 'quickEmailVerificationApi', required: true }],
 		properties: [
 			{
+				displayName: 'Resource',
+				name: 'resource',
+				type: 'options',
+				noDataExpression: true,
+				options: [
+					{
+						name: 'Email Verification',
+						value: RESOURCE,
+					},
+				],
+				default: RESOURCE,
+			},
+			{
 				displayName: 'Operation',
 				name: 'operation',
 				type: 'options',
 				noDataExpression: true,
+				displayOptions: { show: { resource: [RESOURCE] } },
 				options: OPERATION_OPTIONS,
 				default: 'verifyEmail',
 			},
@@ -106,7 +121,7 @@ export class QuickEmailVerification implements INodeType {
 				default: '',
 				required: true,
 				placeholder: 'name@example.com',
-				displayOptions: { show: { operation: ['verifyEmail'] } },
+				displayOptions: { show: { resource: [RESOURCE], operation: ['verifyEmail'] } },
 				description: 'The email address to verify',
 			},
 
@@ -129,7 +144,7 @@ export class QuickEmailVerification implements INodeType {
 					},
 				],
 				default: 'file',
-				displayOptions: { show: { operation: ['bulkSendFile'] } },
+				displayOptions: { show: { resource: [RESOURCE], operation: ['bulkSendFile'] } },
 				description:
 					'Type of input for the file to send. An existing file, or input fields to create a new file.',
 			},
@@ -143,6 +158,7 @@ export class QuickEmailVerification implements INodeType {
 				hint: 'Name of the binary property holding the CSV/TXT list, not the list itself',
 				displayOptions: {
 					show: {
+						resource: [RESOURCE],
 						operation: ['bulkSendFile'],
 						inputType: [InputType.FILE],
 					},
@@ -157,7 +173,7 @@ export class QuickEmailVerification implements INodeType {
 				type: 'string',
 				default: '',
 				placeholder: 'n8n_validation.csv',
-				displayOptions: { show: { operation: ['bulkSendFile'] } },
+				displayOptions: { show: { resource: [RESOURCE], operation: ['bulkSendFile'] } },
 				description:
 					'Optional custom name for the uploaded list, sent as X-QEV-Filename. Defaults to the binary file name or path base name.',
 			},
@@ -167,7 +183,7 @@ export class QuickEmailVerification implements INodeType {
 				type: 'string',
 				default: '',
 				placeholder: 'https://example.com/qev-callback',
-				displayOptions: { show: { operation: ['bulkSendFile'] } },
+				displayOptions: { show: { resource: [RESOURCE], operation: ['bulkSendFile'] } },
 				description:
 					'Optional URL the API will POST the results to once verification completes, sent as X-QEV-Callback. The API retries up to 3 times until it gets a 2xx response.',
 			},
@@ -177,7 +193,7 @@ export class QuickEmailVerification implements INodeType {
 				type: 'string',
 				default: '',
 				placeholder: 'you@example.com',
-				displayOptions: { show: { operation: ['bulkSendFile'] } },
+				displayOptions: { show: { resource: [RESOURCE], operation: ['bulkSendFile'] } },
 				description: 'Optional address to notify when verification completes',
 			},
 
@@ -190,7 +206,10 @@ export class QuickEmailVerification implements INodeType {
 				required: true,
 				placeholder: 'eee3bb69-0176-4646-9bfc-79dd6c5ded5f',
 				displayOptions: {
-					show: { operation: ['bulkFileStatus', 'bulkGetFile', 'bulkDeleteFile'] },
+					show: {
+						resource: [RESOURCE],
+						operation: ['bulkFileStatus', 'bulkGetFile', 'bulkDeleteFile'],
+					},
 				},
 				description:
 					'The ID of the file submitted for verification, returned as file_id by List Verification Send File',
@@ -209,7 +228,7 @@ export class QuickEmailVerification implements INodeType {
 					{ name: 'Valid', value: 'valid' },
 				],
 				default: 'fullreport',
-				displayOptions: { show: { operation: ['bulkGetFile'] } },
+				displayOptions: { show: { resource: [RESOURCE], operation: ['bulkGetFile'] } },
 				description: 'Which report to download',
 			},
 			{
@@ -229,7 +248,7 @@ export class QuickEmailVerification implements INodeType {
 					},
 				],
 				default: 'emails',
-				displayOptions: { show: { operation: ['bulkGetFile'] } },
+				displayOptions: { show: { resource: [RESOURCE], operation: ['bulkGetFile'] } },
 				description: 'How the downloaded report is returned',
 			},
 			{
@@ -237,7 +256,9 @@ export class QuickEmailVerification implements INodeType {
 				name: 'removeDuplicates',
 				type: 'boolean',
 				default: false,
-				displayOptions: { show: { operation: ['bulkGetFile'], output: ['emails'] } },
+				displayOptions: {
+					show: { resource: [RESOURCE], operation: ['bulkGetFile'], output: ['emails'] },
+				},
 				description: 'Whether to drop duplicate email addresses from the returned records',
 			},
 			{
@@ -245,7 +266,9 @@ export class QuickEmailVerification implements INodeType {
 				name: 'includeFile',
 				type: 'boolean',
 				default: false,
-				displayOptions: { show: { operation: ['bulkGetFile'], output: ['emails'] } },
+				displayOptions: {
+					show: { resource: [RESOURCE], operation: ['bulkGetFile'], output: ['emails'] },
+				},
 				description:
 					'Whether to also attach the downloaded CSV as binary data, so it can be viewed and downloaded from the node output',
 			},
@@ -255,7 +278,7 @@ export class QuickEmailVerification implements INodeType {
 				type: 'string',
 				default: '',
 				placeholder: 'n8n_validation_processed.csv',
-				displayOptions: { show: { operation: ['bulkGetFile'] } },
+				displayOptions: { show: { resource: [RESOURCE], operation: ['bulkGetFile'] } },
 				description:
 					'Optional name for the downloaded file. Defaults to the name the API served it under.',
 			},
@@ -265,7 +288,7 @@ export class QuickEmailVerification implements INodeType {
 				type: 'string',
 				default: 'data',
 				required: true,
-				displayOptions: { show: { operation: ['bulkGetFile'] } },
+				displayOptions: { show: { resource: [RESOURCE], operation: ['bulkGetFile'] } },
 				description:
 					'The binary property to write the downloaded CSV report to, used by the File output and by Include File',
 			},
